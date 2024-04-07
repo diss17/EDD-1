@@ -12,7 +12,7 @@ int main() {
   moving_image im;
 
   im.draw("imagen.png");
-  im.rotate();
+  im.move_down(200);
   Sleep(2);
   im.draw("imagen_rotada90_1.png");
   im.rotate();

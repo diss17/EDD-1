@@ -13,8 +13,8 @@
 #define INIT_X W_IMG/2
 
 // Ver más colores en https://htmlcolorcodes.com/
-#define DEFAULT_R 254
-#define DEFAULT_G 249
-#define DEFAULT_B 231
+#define DEFAULT_R 0
+#define DEFAULT_G 0
+#define DEFAULT_B 0
 
 #endif

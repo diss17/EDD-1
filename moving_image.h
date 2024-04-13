@@ -2,6 +2,9 @@
 #define MOVING_IMG_H
 
 #include "basics.h"
+#include <stack>
+#include <vector>
+#include <iostream>
 
 // Clase que representa una imagen como una colección de 3 matrices siguiendo el
 // esquema de colores RGB
@@ -11,7 +14,9 @@ private:
   unsigned char **red_layer; // Capa de tonalidades rojas
   unsigned char **green_layer; // Capa de tonalidades verdes
   unsigned char **blue_layer; // Capa de tonalidades azules
-
+  std::stack<char> stack;
+  std::stack<int> totalCalls;
+  int pixels = 0;
 public:
   // Constructor de la imagen. Se crea una imagen por defecto
   moving_image() {
@@ -19,7 +24,7 @@ public:
     red_layer = new unsigned char*[H_IMG];
     green_layer = new unsigned char*[H_IMG];
     blue_layer = new unsigned char*[H_IMG];
-    
+
     for(int i=0; i < H_IMG; i++) {
       red_layer[i] = new unsigned char[W_IMG];
       green_layer[i] = new unsigned char[W_IMG];
@@ -66,8 +71,23 @@ public:
   void draw(const char* nb) {
     _draw(nb);
   }
-  
+ void cantidadStack(){
+    while (!stack.empty()){
+      std::cout<<stack.top()<<std::endl;
+      stack.pop();
+    } 
+  }
   void rotate(){
+    char rotate = 'r';
+    static int count = 0;
+    count++;
+    for (int i = 0; i < count; i++)
+    {
+      totalCalls.push(count);
+    }
+    for (int i = 0; i < totalCalls.top(); i++){
+      stack.push(rotate);
+    }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Rotar la capa roja
     for(int i=0; i < W_IMG; i++)
@@ -181,6 +201,17 @@ public:
   }
   // Función que similar desplazar la imagen, de manera circular, d pixeles a la izquierda
   void move_right(int d) {
+    pixels = d;
+    char rotate = 'd';
+    static int count = 0;
+    count++;
+    for (int i = 0; i < count; i++)
+    {
+      totalCalls.push(count);
+    }
+    for (int i = 0; i < totalCalls.top(); i++){
+      stack.push(rotate);
+    }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
     // Mover la capa roja
@@ -242,7 +273,7 @@ public:
     for(int i=0; i < H_IMG; i++)
       for(int j=0; j < W_IMG-d; j++)
 	tmp_layer[i][j] = green_layer[i][j+d];      
-    
+  
     for(int i=0; i < H_IMG; i++)
       for(int j=W_IMG-d, k=0; j < W_IMG; j++, k++)
     	tmp_layer[i][j] = green_layer[i][k];      
@@ -264,7 +295,17 @@ public:
       for(int j=0; j < W_IMG; j++)
 	blue_layer[i][j] = tmp_layer[i][j];
   }
-
+  void undo(){
+    if (stack.top() == 'r'){
+      rotate();
+      rotate();
+      rotate();
+    }
+    else if (stack.top() == 'd'){
+      move_left(pixels);
+    }
+        
+  }
 private:
   // Función privada que guarda la imagen en formato .png
   void _draw(const char* nb) {

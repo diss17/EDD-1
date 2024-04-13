@@ -16,7 +16,7 @@ private:
   unsigned char **blue_layer; // Capa de tonalidades azules
   std::stack<char> stack;
   std::stack<int> totalCalls;
-  int pixels = 0;
+  int pixels;
 public:
   // Constructor de la imagen. Se crea una imagen por defecto
   moving_image() {
@@ -24,7 +24,7 @@ public:
     red_layer = new unsigned char*[H_IMG];
     green_layer = new unsigned char*[H_IMG];
     blue_layer = new unsigned char*[H_IMG];
-
+    pixels = 0;
     for(int i=0; i < H_IMG; i++) {
       red_layer[i] = new unsigned char[W_IMG];
       green_layer[i] = new unsigned char[W_IMG];
@@ -79,7 +79,7 @@ public:
   }
   void rotate(){
     char rotate = 'r';
-    static int count = 0;
+    int count = 0;
     count++;
     for (int i = 0; i < count; i++)
     {
@@ -117,6 +117,17 @@ public:
 	blue_layer[i][j] = tmp_layer[i][j];
   }
   void move_up(int d){
+    char rotate = 'u';
+    pixels = d;
+    int count = 0;
+    count++;
+    for (int i = 0; i < count; i++)
+    {
+      totalCalls.push(count);
+    }
+    for (int i = 0; i < totalCalls.top(); i++){
+      stack.push(rotate);
+    }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
     for(int i=0; i < W_IMG-d; i++)
@@ -159,6 +170,17 @@ public:
   }
 
   void move_down(int d){
+    char rotate = 'b';
+    pixels = d;
+    int count = 0;
+    count++;
+    for (int i = 0; i < count; i++)
+    {
+      totalCalls.push(count);
+    }
+    for (int i = 0; i < totalCalls.top(); i++){
+      stack.push(rotate);
+    }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
     for(int i=d; i < W_IMG; i++)
@@ -201,9 +223,9 @@ public:
   }
   // Función que similar desplazar la imagen, de manera circular, d pixeles a la izquierda
   void move_right(int d) {
-    pixels = d;
     char rotate = 'd';
-    static int count = 0;
+    pixels = d;
+    int count = 0;
     count++;
     for (int i = 0; i < count; i++)
     {
@@ -254,6 +276,17 @@ public:
 	blue_layer[i][j] = tmp_layer[i][j];
   }
   void move_left(int d) {
+    char rotate = 'l';
+    pixels = d;
+    int count = 0;
+    count++;
+    for (int i = 0; i < count; i++)
+    {
+      totalCalls.push(count);
+    }
+    for (int i = 0; i < totalCalls.top(); i++){
+      stack.push(rotate);
+    }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
     // Mover la capa roja
@@ -295,16 +328,30 @@ public:
       for(int j=0; j < W_IMG; j++)
 	blue_layer[i][j] = tmp_layer[i][j];
   }
+
   void undo(){
     if (stack.top() == 'r'){
+      stack.pop();
       rotate();
       rotate();
       rotate();
     }
-    else if (stack.top() == 'd'){
+    if (stack.top() == 'd')
+    {
+      stack.pop();
       move_left(pixels);
     }
-        
+    if (stack.top() == 'l')
+    {
+      stack.pop();
+      move_right(pixels);
+    }
+    if (stack.top() == 'u'){
+      move_down(pixels);
+    }
+    if (stack.top() == 'b'){
+      move_up(pixels);
+    }
   }
 private:
   // Función privada que guarda la imagen en formato .png

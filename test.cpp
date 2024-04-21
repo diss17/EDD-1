@@ -10,12 +10,16 @@
 
 int main() {
   moving_image im;
-  im.rotate();
-  im.rotate(); 
-  im.rotate();
+  im.draw("source.png");
+  im.move_left(300);
+  im.draw("izquierda300.png");
+  im.move_right(200);
+  im.draw("derecha200.png");
   im.undo();
-  im.move_right(500);
-  im.draw("salida1.png");
+  im.draw("undoderecha200.png");
+  im.undo();
+  im.draw("undoizquierda300.png");
+
   /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
   método draw() sobreescribirá a la imagen */
 

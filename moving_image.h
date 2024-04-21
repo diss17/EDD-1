@@ -14,7 +14,7 @@ private:
   unsigned char **red_layer; // Capa de tonalidades rojas
   unsigned char **green_layer; // Capa de tonalidades verdes
   unsigned char **blue_layer; // Capa de tonalidades azules
-  std::stack<char> stack;
+  std::stack<std::pair<char,int>> stack;
   std::stack<int> totalCalls;
   int pixels;
 public:
@@ -73,7 +73,7 @@ public:
   }
  void cantidadStack(){
     while (!stack.empty()){
-      std::cout<<stack.top()<<std::endl;
+      std::cout<<stack.top().first;
       stack.pop();
     } 
   }
@@ -86,7 +86,7 @@ public:
       totalCalls.push(count);
     }
     for (int i = 0; i < totalCalls.top(); i++){
-      stack.push(rotate);
+      stack.push({rotate,0});
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Rotar la capa roja
@@ -126,7 +126,7 @@ public:
       totalCalls.push(count);
     }
     for (int i = 0; i < totalCalls.top(); i++){
-      stack.push(rotate);
+      stack.push({rotate,pixels});
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -170,16 +170,12 @@ public:
   }
 
   void move_down(int d){
-    char rotate = 'b';
     pixels = d;
     int count = 0;
     count++;
     for (int i = 0; i < count; i++)
     {
-      totalCalls.push(count);
-    }
-    for (int i = 0; i < totalCalls.top(); i++){
-      stack.push(rotate);
+      stack.push({'b',pixels});
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -223,16 +219,12 @@ public:
   }
   // Función que similar desplazar la imagen, de manera circular, d pixeles a la izquierda
   void move_right(int d) {
-    char rotate = 'd';
     pixels = d;
     int count = 0;
     count++;
     for (int i = 0; i < count; i++)
     {
-      totalCalls.push(count);
-    }
-    for (int i = 0; i < totalCalls.top(); i++){
-      stack.push(rotate);
+      stack.push({'d',pixels});
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
@@ -282,10 +274,7 @@ public:
     count++;
     for (int i = 0; i < count; i++)
     {
-      totalCalls.push(count);
-    }
-    for (int i = 0; i < totalCalls.top(); i++){
-      stack.push(rotate);
+      stack.push({rotate,pixels});
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
@@ -330,27 +319,45 @@ public:
   }
 
   void undo(){
-    if (stack.top() == 'r'){
+    if (stack.top().first == 'r'){
       stack.pop();
       rotate();
       rotate();
       rotate();
     }
-    if (stack.top() == 'd')
-    {
+    if (stack.top().first == 'd'){
+      move_left(stack.top().second);
       stack.pop();
-      move_left(pixels);
+      std::cout<<stack.top().first;
+      // if (!stack.empty()){
+      //   move_left(stack.top().second);
+      //   stack.pop();
+      // }
     }
-    if (stack.top() == 'l')
-    {
+    if (stack.top().first == 'l'){
       stack.pop();
-      move_right(pixels);
+      move_right(stack.top().second);
+      // if (!stack.empty()){
+      //   std::cout<<stack.top().first;
+      //   move_left(stack.top().second);
+      //   stack.pop();
+      // }
     }
-    if (stack.top() == 'u'){
-      move_down(pixels);
+    if (stack.top().first == 'u'){
+      move_down(stack.top().second);
+      stack.pop();
+      if (!stack.empty()){
+        stack.pop();
+        move_down(stack.top().second);
+      }
     }
-    if (stack.top() == 'b'){
-      move_up(pixels);
+    if (stack.top().first == 'b'){
+      move_up(stack.top().second);
+      stack.pop();
+      if (!stack.empty()){
+        stack.pop();
+        move_up(stack.top().second);
+      }
     }
   }
 private:

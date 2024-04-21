@@ -11,15 +11,14 @@
 int main() {
   moving_image im;
   im.draw("source.png");
-  im.move_left(300);
-  im.draw("izquierda300.png");
-  im.move_right(200);
-  im.draw("derecha200.png");
+  im.move_down(400);
+  im.draw("down400.png");
+  im.move_left(200);
+  im.draw("left200.png");
   im.undo();
-  im.draw("undoderecha200.png");
+  im.draw("undoleft200.png");
   im.undo();
-  im.draw("undoizquierda300.png");
-
+  im.draw("undodown400.png");
   /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
   método draw() sobreescribirá a la imagen */
 

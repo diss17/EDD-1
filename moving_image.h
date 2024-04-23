@@ -5,6 +5,7 @@
 #include <stack>
 #include <vector>
 #include <iostream>
+#include <queue>
 
 // Clase que representa una imagen como una colección de 3 matrices siguiendo el
 // esquema de colores RGB
@@ -15,7 +16,9 @@ private:
   unsigned char **red_layer;   // Capa de tonalidades rojas
   unsigned char **green_layer; // Capa de tonalidades verdes
   unsigned char **blue_layer;  // Capa de tonalidades azules
-  std::stack<std::pair<char, int>> stack;
+  std::stack<std::pair<char, int>> stackUndo;
+  std::stack<std::pair<char, int>> stackRedo;
+  std::queue<std::pair<char, int>> queueRepeatAll;
   int pixels;
   // Para evitar pushear letras al stack cuando se llama al undo
 public:
@@ -85,64 +88,173 @@ public:
   }
   void cantidadStack()
   {
-    while (!stack.empty())
+    while (!queueRepeatAll.empty())
     {
-      std::cout << stack.top().second;
-      std::cout << stack.top().first;
-      stack.pop();
+      std::cout << queueRepeatAll.front().second;
+      std::cout << queueRepeatAll.front().first;
+      queueRepeatAll.pop();
     }
   }
   void llenarStack(char aux, int pixels, int countFunc)
   {
     for (int i = 0; i < countFunc; i++)
     {
-      stack.push({aux, pixels});
+      stackUndo.push({aux, pixels});
     }
+  }
+  void repeatAll()
+  {
+  }
+  void repeat()
+  {
+    if (stackUndo.empty())
+    {
+      std::cout << "undomalo";
+    }
+    if (!stackUndo.empty() && stackUndo.top().first == 'd')
+    {
+      flag = true;
+      int distance = stackUndo.top().second;
+      move_right(distance);
+      queueRepeatAll.push({'d', distance});
+    }
+    if (!stackUndo.empty() && stackUndo.top().first == 'u')
+    {
+      flag = true;
+      int distance = stackUndo.top().second;
+      move_up(distance);
+      queueRepeatAll.push({'u', distance});
+    }
+    else if (!stackUndo.empty() && stackUndo.top().first == 'l')
+    {
+      flag = true;
+      int distance = stackUndo.top().second;
+      move_left(distance);
+      queueRepeatAll.push({'l', distance});
+    }
+    else if (!stackUndo.empty() && stackUndo.top().first == 'b')
+    {
+      flag = true;
+      int distance = stackUndo.top().second;
+      move_down(distance);
+      queueRepeatAll.push({'b', distance});
+    }
+    else if (!stackUndo.empty() && stackUndo.top().first == 'r')
+    {
+      flag = true;
+      rotate();
+      queueRepeatAll.push({'r', 0});
+    }
+  }
+  void redo()
+  {
+    if (stackRedo.empty())
+    {
+      std::cout << "redomalo";
+    }
+    else if (!stackRedo.empty() && stackRedo.top().first == 'r')
+    {
+      flag = false;
+      rotate();
+      queueRepeatAll.push({'r', 0});
+      stackRedo.pop();
+    }
+    else if (!stackRedo.empty() && stackRedo.top().first == 'l')
+    {
+      flag = false;
+      int distance = stackRedo.top().second;
+      move_left(distance);
+      queueRepeatAll.push({'l', distance});
+      stackRedo.pop();
+    }
+    else if (!stackRedo.empty() && stackRedo.top().first == 'd')
+    {
+      flag = false;
+      int distance = stackRedo.top().second;
+      move_right(distance);
+      queueRepeatAll.push({'d', distance});
+      stackRedo.pop();
+    }
+    else if (!stackRedo.empty() && stackRedo.top().first == 'u')
+    {
+      flag = false;
+      int distance = stackRedo.top().second;
+      move_up(distance);
+      queueRepeatAll.push({'u', distance});
+      stackRedo.pop();
+    }
+    else if (!stackRedo.empty() && stackRedo.top().first == 'b')
+    {
+      flag = false;
+      int distance = stackRedo.top().second;
+      move_down(distance);
+      queueRepeatAll.push({'b', distance});
+      stackRedo.pop();
+    }
+    flag = true;
   }
   void undo()
   {
-    if (stack.empty())
+    if (stackUndo.empty())
     {
-      std::cout << "ESTA VACIO EL STACK AWEONAO";
+      std::cout << "undomalo";
     }
-    if (!stack.empty() && stack.top().first == 'd')
+    if (!stackUndo.empty() && stackUndo.top().first == 'd')
     {
       flag = false;
-      int distance = stack.top().second;
+      int distance = stackUndo.top().second;
       move_left(distance);
-      stack.pop();
+      stackRedo.push({'d', distance});
+      queueRepeatAll.push({'l', distance});
+      stackUndo.pop();
     }
-    if (!stack.empty() && stack.top().first == 'u')
+    if (!stackUndo.empty() && stackUndo.top().first == 'u')
     {
       flag = false;
-      int distance = stack.top().second;
+      int distance = stackUndo.top().second;
       move_down(distance);
-      stack.pop();
+      stackRedo.push({'u', distance});
+      queueRepeatAll.push({'b', distance});
+      stackUndo.pop();
     }
-    else if (!stack.empty() && stack.top().first == 'l')
+    else if (!stackUndo.empty() && stackUndo.top().first == 'l')
     {
       flag = false;
-      int distance = stack.top().second;
+      int distance = stackUndo.top().second;
       move_right(distance);
-      stack.pop();
+      stackRedo.push({'l', distance});
+      queueRepeatAll.push({'d', distance});
+      stackUndo.pop();
     }
-    else if (!stack.empty() && stack.top().first == 'b')
+    else if (!stackUndo.empty() && stackUndo.top().first == 'b')
     {
       flag = false;
-      int distance = stack.top().second;
+      int distance = stackUndo.top().second;
       move_up(distance);
-      stack.pop();
+      stackRedo.push({'b', distance});
+      queueRepeatAll.push({'u', distance});
+      stackUndo.pop();
+    }
+    else if (!stackUndo.empty() && stackUndo.top().first == 'r')
+    {
+      flag = false;
+      stackRedo.push({'r', 0});
+      queueRepeatAll.push({'r', 0});
+      stackUndo.pop();
+      for (int i = 0; i < 3; i++)
+      {
+        rotate();
+      }
     }
     flag = true;
   }
   void rotate()
   {
-    char rotate = 'r';
     int count = 0;
     count++;
-    for (int i = 0; i < count; i++)
+    if (flag)
     {
-      stack.push({rotate, 0});
+      llenarStack('r', 0, count);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Rotar la capa roja

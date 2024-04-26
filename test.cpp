@@ -11,23 +11,12 @@
 int main()
 {
   moving_image im;
-  im.draw("source.png");
   im.rotate();
-  im.draw("rotate.png");
-  im.repeat();
-  im.draw("repeatrotate.png");
+  im.rotate(); 
+  im.rotate();
   im.undo();
-  im.draw("undorotate.png");
-  im.redo();
-  im.draw("volvemosarepeatrotate.png");
-  im.repeat();
-  im.draw("volvemosarotar.png");
-  im.move_up(200);
-  im.draw("mover200up.png");
-  im.undo();
-  im.draw("undo200up.png");
-  im.cantidadStack();
-
+  im.move_right(500);
+  im.repeat_all();
   /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
   método draw() sobreescribirá a la imagen */
 

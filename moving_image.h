@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 #include <queue>
+#include <cstdio>
+#include <string.h>
 
 // Clase que representa una imagen como una colección de 3 matrices siguiendo el
 // esquema de colores RGB
@@ -88,63 +90,148 @@ public:
   }
   void cantidadStack()
   {
+    while (!stackUndo.empty())
+    {
+      std::cout << stackUndo.top().first;
+      std::cout << stackUndo.top().second << std::endl;
+      stackUndo.pop();
+    }
+  }
+  void cantidadQueue()
+  {
     while (!queueRepeatAll.empty())
     {
-      std::cout << queueRepeatAll.front().second;
       std::cout << queueRepeatAll.front().first;
+      std::cout << queueRepeatAll.front().second;
       queueRepeatAll.pop();
     }
   }
-  void llenarStack(char aux, int pixels, int countFunc)
+  void llenarStack(char aux, int pixels)
   {
-    for (int i = 0; i < countFunc; i++)
-    {
-      stackUndo.push({aux, pixels});
-    }
+    stackUndo.push({aux, pixels});
   }
-  void repeatAll()
+  void llenarQueue(char aux, int pixels)
   {
+    queueRepeatAll.push({aux, pixels});
+  }
+  void repeat_all() // No funciona el dibujar imagenes
+  {
+    moving_image im;
+    im.setCoordsImageDefault();
+    im.draw("imagenfuente.png");
+    while (!queueRepeatAll.empty())
+    {
+      flag = false;
+      int count = queueRepeatAll.size();
+      count--;
+
+      std::string chain = std::to_string(count);
+      std::string filename = "imagen" + chain + ".png";
+
+      char instruccion = queueRepeatAll.front().first;
+      int distance = queueRepeatAll.front().second;
+      switch (instruccion)
+      {
+      case 'b':
+        im.move_down(distance);
+        im.draw(filename.c_str());
+        break;
+      case 'l':
+        im.move_left(distance);
+        im.draw(filename.c_str());
+        break;
+      case 'r':
+        im.rotate();
+        im.draw(filename.c_str());
+        break;
+      case 'R':
+        im.UndoRotate();
+        im.draw(filename.c_str());
+        break;
+      case 'u':
+        im.move_up(distance);
+        im.draw(filename.c_str());
+        break;
+      case 'd':
+        im.move_right(distance);
+        im.draw(filename.c_str());
+        break;
+      }
+      queueRepeatAll.pop();
+    }
   }
   void repeat()
   {
     if (stackUndo.empty())
     {
-      std::cout << "undomalo";
+      std::cout << "repeatmalo";
     }
-    if (!stackUndo.empty() && stackUndo.top().first == 'd')
+    else
     {
       flag = true;
+      char instruccion = stackUndo.top().first;
       int distance = stackUndo.top().second;
-      move_right(distance);
-      queueRepeatAll.push({'d', distance});
+      switch (instruccion)
+      {
+      case 'u':
+        move_up(distance);
+        break;
+      case 'b':
+        move_down(distance);
+        break;
+      case 'l':
+        move_left(distance);
+        break;
+      case 'r':
+        rotate();
+        break;
+      case 'd':
+        move_right(distance);
+        break;
+      }
+      llenarQueue(instruccion, distance);
+      queueRepeatAll.pop();
     }
-    if (!stackUndo.empty() && stackUndo.top().first == 'u')
-    {
-      flag = true;
-      int distance = stackUndo.top().second;
-      move_up(distance);
-      queueRepeatAll.push({'u', distance});
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'l')
-    {
-      flag = true;
-      int distance = stackUndo.top().second;
-      move_left(distance);
-      queueRepeatAll.push({'l', distance});
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'b')
-    {
-      flag = true;
-      int distance = stackUndo.top().second;
-      move_down(distance);
-      queueRepeatAll.push({'b', distance});
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'r')
-    {
-      flag = true;
-      rotate();
-      queueRepeatAll.push({'r', 0});
-    }
+    /*  else if (!stackUndo.empty() && stackUndo.top().first == 'd')
+     {
+       flag = true;
+       int distance = stackUndo.top().second;
+       move_right(distance);
+       llenarQueue('d', distance);
+       queueRepeatAll.pop();
+     }
+     else if (!stackUndo.empty() && stackUndo.top().first == 'u')
+     {
+       flag = true;
+       int distance = stackUndo.top().second;
+       move_up(distance);
+       llenarQueue('u', distance);
+       queueRepeatAll.pop();
+     }
+     else if (!stackUndo.empty() && stackUndo.top().first == 'l')
+     {
+       flag = true;
+
+       int distance = stackUndo.top().second;
+       move_left(distance);
+       llenarQueue('l', distance);
+       queueRepeatAll.pop();
+     }
+     else if (!stackUndo.empty() && stackUndo.top().first == 'b')
+     {
+       flag = true;
+       int distance = stackUndo.top().second;
+       move_down(distance);
+       llenarQueue('b', distance);
+       queueRepeatAll.pop();
+     }
+     else if (!stackUndo.empty() && stackUndo.top().first == 'r')
+     {
+       flag = true;
+       rotate();
+       llenarQueue('r', 0);
+       queueRepeatAll.pop();
+     } */
   }
   void redo()
   {
@@ -152,11 +239,38 @@ public:
     {
       std::cout << "redomalo";
     }
-    else if (!stackRedo.empty() && stackRedo.top().first == 'r')
+    else
+    {
+      flag = false;
+      char instruccion = stackUndo.top().first;
+      int distance = stackUndo.top().second;
+      switch (instruccion)
+      {
+      case 'u':
+        move_up(distance);
+        break;
+      case 'b':
+        move_down(distance);
+        break;
+      case 'l':
+        move_left(distance);
+        break;
+      case 'r':
+        rotate();
+      case 'd':
+        move_right(distance);
+        break;
+      }
+      llenarQueue(instruccion, pixels);
+      stackRedo.pop();
+      flag = true;
+    }
+
+    /* else if (!stackRedo.empty() && stackRedo.top().first == 'r')
     {
       flag = false;
       rotate();
-      queueRepeatAll.push({'r', 0});
+      llenarQueue('r', pixels);
       stackRedo.pop();
     }
     else if (!stackRedo.empty() && stackRedo.top().first == 'l')
@@ -164,7 +278,7 @@ public:
       flag = false;
       int distance = stackRedo.top().second;
       move_left(distance);
-      queueRepeatAll.push({'l', distance});
+      llenarQueue('l', distance);
       stackRedo.pop();
     }
     else if (!stackRedo.empty() && stackRedo.top().first == 'd')
@@ -172,7 +286,7 @@ public:
       flag = false;
       int distance = stackRedo.top().second;
       move_right(distance);
-      queueRepeatAll.push({'d', distance});
+      llenarQueue('d', distance);
       stackRedo.pop();
     }
     else if (!stackRedo.empty() && stackRedo.top().first == 'u')
@@ -180,7 +294,7 @@ public:
       flag = false;
       int distance = stackRedo.top().second;
       move_up(distance);
-      queueRepeatAll.push({'u', distance});
+      llenarQueue('u', distance);
       stackRedo.pop();
     }
     else if (!stackRedo.empty() && stackRedo.top().first == 'b')
@@ -188,65 +302,105 @@ public:
       flag = false;
       int distance = stackRedo.top().second;
       move_down(distance);
-      queueRepeatAll.push({'b', distance});
+      llenarQueue('b', distance);
       stackRedo.pop();
     }
-    flag = true;
+    flag = true; */
   }
   void undo()
   {
     if (stackUndo.empty())
     {
-      std::cout << "undomalo";
+      std::cout << "Undo malo";
     }
-    if (!stackUndo.empty() && stackUndo.top().first == 'd')
+    else
     {
       flag = false;
+      char instruccion = stackUndo.top().first;
       int distance = stackUndo.top().second;
-      move_left(distance);
-      stackRedo.push({'d', distance});
-      queueRepeatAll.push({'l', distance});
-      stackUndo.pop();
-    }
-    if (!stackUndo.empty() && stackUndo.top().first == 'u')
-    {
-      flag = false;
-      int distance = stackUndo.top().second;
-      move_down(distance);
-      stackRedo.push({'u', distance});
-      queueRepeatAll.push({'b', distance});
-      stackUndo.pop();
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'l')
-    {
-      flag = false;
-      int distance = stackUndo.top().second;
-      move_right(distance);
-      stackRedo.push({'l', distance});
-      queueRepeatAll.push({'d', distance});
-      stackUndo.pop();
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'b')
-    {
-      flag = false;
-      int distance = stackUndo.top().second;
-      move_up(distance);
-      stackRedo.push({'b', distance});
-      queueRepeatAll.push({'u', distance});
-      stackUndo.pop();
-    }
-    else if (!stackUndo.empty() && stackUndo.top().first == 'r')
-    {
-      flag = false;
-      stackRedo.push({'r', 0});
-      queueRepeatAll.push({'r', 0});
-      stackUndo.pop();
-      for (int i = 0; i < 3; i++)
+
+      switch (instruccion)
       {
-        rotate();
+      case 'd':
+        move_left(distance);
+        llenarQueue('l', pixels);
+        break;
+      case 'l':
+        move_right(distance);
+        llenarQueue('d', pixels);
+        break;
+      case 'u':
+        move_down(distance);
+        llenarQueue('b', pixels);
+        break;
+      case 'b':
+        move_up(distance);
+        llenarQueue('u', pixels);
+        break;
+      case 'r':
+        llenarQueue('R', pixels);
+        for (int i = 0; i < 3; i++)
+        {
+          rotate();
+        }
+        break;
       }
+      stackRedo.push({instruccion, distance});
+      stackUndo.pop();
+      flag = true;
     }
-    flag = true;
+    /*     if (stackUndo.empty())
+        {
+          std::cout << "undomalo";
+        }
+        if (!stackUndo.empty() && stackUndo.top().first == 'd')
+        {
+          flag = false;
+          int distance = stackUndo.top().second;
+          move_left(distance);
+          stackRedo.push({'d', distance});
+          llenarQueue('l', pixels);
+          stackUndo.pop();
+        }
+        if (!stackUndo.empty() && stackUndo.top().first == 'u')
+        {
+          flag = false;
+          int distance = stackUndo.top().second;
+          move_down(distance);
+          stackRedo.push({'u', distance});
+          llenarQueue('b', pixels);
+          stackUndo.pop();
+        }
+        else if (!stackUndo.empty() && stackUndo.top().first == 'l')
+        {
+          flag = false;
+          int distance = stackUndo.top().second;
+          move_right(distance);
+          stackRedo.push({'l', distance});
+          llenarQueue('d', pixels);
+          stackUndo.pop();
+        }
+        else if (!stackUndo.empty() && stackUndo.top().first == 'b')
+        {
+          flag = false;
+          int distance = stackUndo.top().second;
+          move_up(distance);
+          stackRedo.push({'b', distance});
+          llenarQueue('u', distance);
+          stackUndo.pop();
+        }
+        else if (!stackUndo.empty() && stackUndo.top().first == 'r')
+        {
+          flag = false;
+          stackRedo.push({'r', 0});
+          llenarQueue('R', 0);
+          stackUndo.pop();
+          for (int i = 0; i < 3; i++)
+          {
+            rotate();
+          }
+        }
+        flag = true; */
   }
   void rotate()
   {
@@ -254,7 +408,8 @@ public:
     count++;
     if (flag)
     {
-      llenarStack('r', 0, count);
+      llenarQueue('r', 0);
+      llenarStack('r', 0);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Rotar la capa roja
@@ -292,7 +447,8 @@ public:
     count++;
     if (flag)
     {
-      llenarStack('u', pixels, count);
+      llenarQueue('u', pixels);
+      llenarStack('u', pixels);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -342,7 +498,8 @@ public:
     count++;
     if (flag)
     {
-      llenarStack('b', pixels, count);
+      llenarQueue('b', pixels);
+      llenarStack('b', pixels);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -392,7 +549,8 @@ public:
     count++;
     if (flag)
     {
-      llenarStack('d', pixels, count);
+      llenarQueue('d', pixels);
+      llenarStack('d', pixels);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
@@ -442,7 +600,8 @@ public:
     count++;
     if (flag)
     {
-      llenarStack('l', pixels, count);
+      llenarQueue('l', pixels);
+      llenarStack('l', pixels);
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -486,6 +645,33 @@ public:
   }
 
 private:
+  void setCoordsImageDefault()
+  {
+    for (int i = 0; i < 322; i++)
+      for (int j = 0; j < 256; j++)
+      {
+        if (!s_R[i][j] && !s_G[i][j] && !s_B[i][j])
+        {
+          red_layer[INIT_Y + i][INIT_X + j] = DEFAULT_R;
+          green_layer[INIT_Y + i][INIT_X + j] = DEFAULT_G;
+          blue_layer[INIT_Y + i][INIT_X + j] = DEFAULT_B;
+        }
+        else
+        {
+          red_layer[INIT_Y + i][INIT_X + j] = s_R[i][j];
+          green_layer[INIT_Y + i][INIT_X + j] = s_G[i][j];
+          blue_layer[INIT_Y + i][INIT_X + j] = s_B[i][j];
+        }
+      }
+  }
+  void UndoRotate()
+  {
+    flag = false;
+    for (int i = 0; i < 3; i++)
+    {
+      rotate();
+    }
+  }
   // Función privada que guarda la imagen en formato .png
   void _draw(const char *nb)
   {

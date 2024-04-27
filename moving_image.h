@@ -145,7 +145,7 @@ public:
         im.draw(filename.c_str());
         break;
       case 'R':
-        im.UndoRotate();
+        im.undoRotate();
         im.draw(filename.c_str());
         break;
       case 'u':
@@ -164,7 +164,7 @@ public:
   {
     if (stackUndo.empty())
     {
-      std::cout << "repeatmalo";
+      std::cout << "repeat malo";
     }
     else
     {
@@ -196,7 +196,7 @@ public:
   {
     if (stackRedo.empty())
     {
-      std::cout << "redomalo";
+      std::cout << "redo malo";
     }
     else
     {
@@ -216,6 +216,7 @@ public:
         break;
       case 'r':
         rotate();
+        break;
       case 'd':
         move_right(distance);
         break;
@@ -274,6 +275,8 @@ public:
     {
       llenarQueue('r', 0);
       llenarStack('r', 0);
+      std::stack<std::pair<char, int>> redo;
+      stackRedo = redo;
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Rotar la capa roja
@@ -310,6 +313,8 @@ public:
     {
       llenarQueue('u', pixels);
       llenarStack('u', pixels);
+      std::stack<std::pair<char, int>> redo;
+      stackRedo = redo;
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -358,6 +363,8 @@ public:
     {
       llenarQueue('b', pixels);
       llenarStack('b', pixels);
+      std::stack<std::pair<char, int>> redo;
+      stackRedo = redo;
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -407,6 +414,8 @@ public:
     {
       llenarQueue('d', pixels);
       llenarStack('d', pixels);
+      std::stack<std::pair<char, int>> redo;
+      stackRedo = redo;
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
 
@@ -452,12 +461,12 @@ public:
   void move_left(int d)
   {
     pixels = d;
-    int count = 0;
-    count++;
     if (flag)
     {
       llenarQueue('l', pixels);
       llenarStack('l', pixels);
+      std::stack<std::pair<char, int>> redo;
+      stackRedo = redo;
     }
     unsigned char tmp_layer[H_IMG][W_IMG];
     // Mover la capa roja
@@ -499,6 +508,7 @@ public:
       for (int j = 0; j < W_IMG; j++)
         blue_layer[i][j] = tmp_layer[i][j];
   }
+
 private:
   void setCoordsImageDefault()
   {
@@ -519,7 +529,7 @@ private:
         }
       }
   }
-  void UndoRotate()
+  void undoRotate()
   {
     flag = false;
     for (int i = 0; i < 3; i++)

@@ -7,20 +7,13 @@
 
 #include "moving_image.h"
 #include <windows.h> // para sleep (linux). Usar  #include<windows.h> para Windows
-
+// Integrantes:
+// 1- Alex Antonio Blanchard Ortiz
+// 2- Daniel Ignacio Soto Salgado
 int main()
 {
   moving_image im;
-  im.rotate();
-  im.rotate(); 
-  im.rotate();
-  im.undo();
-  im.move_right(50);
-  im.repeat();
-  im.repeat();
-  im.undo();
-  im.cantidadQueue();
-  im.draw("salida.png");
+
   /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
   método draw() sobreescribirá a la imagen */
 

@@ -15,8 +15,12 @@ int main()
   im.rotate(); 
   im.rotate();
   im.undo();
-  im.move_right(500);
-  im.repeat_all();
+  im.move_right(50);
+  im.repeat();
+  im.repeat();
+  im.undo();
+  im.cantidadQueue();
+  im.draw("salida.png");
   /* NOTA 1: Si usan el mismo nombre para las imágenes, entonces cada llamada al
   método draw() sobreescribirá a la imagen */
 
